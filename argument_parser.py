@@ -169,7 +169,7 @@ parser.add_argument('--eval_every',
 parser.add_argument('--vis_every',
                     help='how often to visualize during training, never if None',
                     type=int,
-                    default=1)
+                    default=None)
 
 parser.add_argument('--save_every',
                     help='how often to save during training, never if None',

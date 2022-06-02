@@ -2,6 +2,7 @@ import torch
 from torch import nn, optim, utils
 import numpy as np
 import os
+import sys
 import time
 import dill
 import json
@@ -9,8 +10,6 @@ import random
 import pathlib
 import warnings
 from tqdm import tqdm
-import visualization
-import evaluation
 import matplotlib.pyplot as plt
 from argument_parser import args
 sys.path.append("Trajectron_plus_plus/trajectron")
@@ -18,6 +17,8 @@ from trajectronEWTA import TrajectronEWTA
 from Trajectron_plus_plus.trajectron.model.model_registrar import ModelRegistrar
 from Trajectron_plus_plus.trajectron.model.model_utils import cyclical_lr
 from Trajectron_plus_plus.trajectron.model.dataset import EnvironmentDataset, collate
+import Trajectron_plus_plus.trajectron.visualization
+import Trajectron_plus_plus.trajectron.evaluation
 from tensorboardX import SummaryWriter
 # torch.autograd.set_detect_anomaly(True)
 
@@ -255,6 +256,7 @@ def main():
             curr_iter = curr_iter_node_type[node_type]
             pbar = tqdm(data_loader, ncols=80)
             for batch in pbar:
+                batch.append(torch.Tensor([]))
                 trajectron.set_curr_iter(curr_iter)
                 trajectron.step_annealers(node_type)
                 optimizer[node_type].zero_grad()
@@ -367,7 +369,7 @@ def main():
         if args.eval_every is not None and not args.debug and epoch % args.eval_every == 0 and epoch > 0:
             max_hl = hyperparams['maximum_history_length']
             ph = hyperparams['prediction_horizon']
-            prediction_parameters = PARAMS['nuScenes'] if 'nuScenes' in args.data else PARAMS['eth-ucy']
+            prediction_parameters = PARAMS['eth-ucy']
             model_registrar.to(args.eval_device)
             with torch.no_grad():
                 # Calculate evaluation loss
@@ -376,6 +378,7 @@ def main():
                     print(f"Starting Evaluation @ epoch {epoch} for node type: {node_type}")
                     pbar = tqdm(data_loader, ncols=80)
                     for batch in pbar:
+                        import pdb; pdb.set_trace()
                         eval_loss_node_type = eval_trajectron.eval_loss(batch, node_type)
                         pbar.set_description(f"Epoch {epoch}, {node_type} L: {eval_loss_node_type.item():.2f}")
                         eval_loss.append({node_type: {'nll': [eval_loss_node_type]}})
