@@ -378,8 +378,8 @@ def main():
                     print(f"Starting Evaluation @ epoch {epoch} for node type: {node_type}")
                     pbar = tqdm(data_loader, ncols=80)
                     for batch in pbar:
-                        import pdb; pdb.set_trace()
-                        eval_loss_node_type = eval_trajectron.eval_loss(batch, node_type)
+                        batch.append(torch.Tensor([]))
+                        eval_loss_node_type = eval_trajectron.eval_loss(batch, node_type, 'epe-top-20')
                         pbar.set_description(f"Epoch {epoch}, {node_type} L: {eval_loss_node_type.item():.2f}")
                         eval_loss.append({node_type: {'nll': [eval_loss_node_type]}})
                         del batch
