@@ -417,33 +417,6 @@ def main():
                                             bar_plot=['kde'],
                                             box_plot=['ade', 'fde'])
 
-                # Predict maximum likelihood batch timesteps for evaluation dataset evaluation
-                eval_batch_errors_ml = []
-                for scene in tqdm(eval_scenes, desc='MM Evaluation', ncols=80):
-                    timesteps = scene.sample_timesteps(scene.timesteps)
-
-                    predictions, features = eval_trajectron.predict(scene, 
-                                                             timesteps, 
-                                                             ph, 
-                                                             min_history_timesteps=prediction_parameters[0],
-                                                             min_future_timesteps=prediction_parameters[1],
-                                                             selected_node_type=args.node_type)
-                    if features is None:
-                        continue
-
-                    eval_batch_errors_ml.append(evaluation.compute_batch_statistics(predictions, 
-                                                                                    scene.dt, 
-                                                                                    max_hl=max_hl, 
-                                                                                    ph=ph,
-                                                                                    node_type_enum=eval_env.NodeType, 
-                                                                                    map=scene.map,
-                                                                                    kde=False))
-
-                evaluation.log_batch_errors(eval_batch_errors_ml,
-                                            log_writer,
-                                            'eval/ml',
-                                            epoch)
-
         if args.save_every is not None and args.debug is False and epoch % args.save_every == 0:
             model_registrar.save_models(epoch)
 
