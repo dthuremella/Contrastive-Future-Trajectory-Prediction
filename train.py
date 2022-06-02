@@ -17,8 +17,8 @@ from trajectronEWTA import TrajectronEWTA
 from Trajectron_plus_plus.trajectron.model.model_registrar import ModelRegistrar
 from Trajectron_plus_plus.trajectron.model.model_utils import cyclical_lr
 from Trajectron_plus_plus.trajectron.model.dataset import EnvironmentDataset, collate
-import Trajectron_plus_plus.trajectron.visualization
-import Trajectron_plus_plus.trajectron.evaluation
+from Trajectron_plus_plus.trajectron.visualization import visualization
+from Trajectron_plus_plus.trajectron.evaluation import evaluation
 from tensorboardX import SummaryWriter
 # torch.autograd.set_detect_anomaly(True)
 
