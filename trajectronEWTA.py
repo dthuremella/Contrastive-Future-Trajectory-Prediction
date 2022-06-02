@@ -65,6 +65,44 @@ class TrajectronEWTA(Trajectron):
                                 temp=temp)
         return loss
 
+    def eval_loss(self, batch, node_type, loss_type,
+                   lambda_kalman=1.0, lambda_sim=1.0, temp=0.1,
+                   contrastive=False):
+        (first_history_index,
+         x_t, y_t, x_st_t, y_st_t,
+         neighbors_data_st,
+         neighbors_edge_value,
+         robot_traj_st_t,
+         map, score) = batch
+        neighbors_data_st_0_dict = restore(neighbors_data_st)
+        neighbors_edge_value_0_dict = restore(neighbors_edge_value)
+        x = x_t.to(self.device)
+        score = score.to(self.device)
+        y = y_t.to(self.device)
+        x_st_t = x_st_t.to(self.device)
+        y_st_t = y_st_t.to(self.device)
+        if robot_traj_st_t is not None:
+            robot_traj_st_t = robot_traj_st_t.to(self.device)
+        if type(map) == torch.Tensor:
+            map = map.to(self.device)
+        model = self.node_models_dict[node_type]
+        loss = model.train_loss(inputs=x,
+                                inputs_st=x_st_t,
+                                first_history_indices=first_history_index,
+                                labels=y,
+                                labels_st=y_st_t,
+                                neighbors=neighbors_data_st_0_dict,
+                                neighbors_edge_value=neighbors_edge_value_0_dict,
+                                robot=robot_traj_st_t,
+                                map=map,
+                                prediction_horizon=self.ph,
+                                loss_type=loss_type,
+                                score=score,
+                                contrastive=contrastive,
+                                factor_con=lambda_kalman,
+                                temp=temp)
+        return loss.cpu().detach().numpy()
+
     def predict(self,
                 scene,
                 timesteps,
