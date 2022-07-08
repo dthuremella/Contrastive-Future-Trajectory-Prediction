@@ -28,7 +28,7 @@ def bmc_loss_md(y, labels, noise_var):
 class BMCLoss(_Loss):
     def __init__(self, init_noise_sigma, device):
         super(BMCLoss, self).__init__()
-        self.noise_sigma = torch.nn.Parameter(torch.tensor(init_noise_sigma, device=device))
+        self.noise_sigma = torch.nn.Parameter(torch.tensor(init_noise_sigma, device=device, dtype=torch.float))
 
     def forward(self, pred, target):
         noise_var = self.noise_sigma ** 2
