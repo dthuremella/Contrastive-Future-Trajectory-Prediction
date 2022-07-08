@@ -243,7 +243,7 @@ def main():
         if args.bmc:
             sigma_lr = 1e-2
             init_noise_sigma = 1
-            criterion = BMCLoss(init_noise_sigma, args.device)
+            criterion = BMCLoss(init_noise_sigma)
             optimizer[node_type].add_param_group({'params': criterion.noise_sigma, 'lr': sigma_lr, 'name': 'noise_sigma'})
 
         # Set Learning Rate
