@@ -11,6 +11,11 @@ from Trajectron_plus_plus.trajectron.model.model_utils import *
 from Trajectron_plus_plus.trajectron.model.mgcvae import MultimodalGenerativeCVAE
 import utilities
 
+def pareto(a):
+    nu = 1
+    epsilon = 0.1
+    p = (1 + epsilon * a / nu) ** -(1/epsilon + 1)
+    return p
 
 def contrastive_three_modes_loss(features, scores, temp=0.1, base_temperature=0.07):
     device = (torch.device('cuda') if features.is_cuda
@@ -230,7 +235,7 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
         elif mode == 'epe-all':
             sum_spatial_epe = torch.sum(spatial_epes, dim=(1, 2))
 
-        return torch.mean(sum_spatial_epe)
+        return sum_spatial_epe
 
     def train_loss(self,
                    inputs,
@@ -246,6 +251,7 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
                    loss_type,
                    score,
                    contrastive=False,
+                   plm=False,
                    factor_con=100,
                    temp=0.1):
         mode = ModeKeys.TRAIN
@@ -276,8 +282,14 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
                                            positive, self.curr_iter)
                 self.log_writer.add_scalar('%s/%s' % (str(self.node_type), 'negatives'),
                                            negative, self.curr_iter)
+        elif plm:
+            lamda = 1
+            plm_loss = 1 - pareto(loss)
+            final_loss = loss + lamda * plm_loss
         else:
             final_loss = loss
+        
+        final_loss = torch.mean(final_loss)
 
         if self.log_writer is not None:
             self.log_writer.add_scalar('%s/%s' % (str(self.node_type), 'loss'),

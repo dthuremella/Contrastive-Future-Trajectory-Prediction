@@ -260,7 +260,7 @@ def main():
                 trajectron.set_curr_iter(curr_iter)
                 trajectron.step_annealers(node_type)
                 optimizer[node_type].zero_grad()
-                train_loss = trajectron.train_loss(batch, node_type, 'epe-top-20')
+                train_loss = trajectron.train_loss(batch, node_type, 'epe-top-20', contrastive=args.contrastive, plm=args.plm)
                 pbar.set_description(f"Epoch {epoch}, {node_type} L: {train_loss.item():.2f}")
                 train_loss.backward()
                 # Clipping gradients.

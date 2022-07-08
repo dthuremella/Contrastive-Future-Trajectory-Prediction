@@ -29,7 +29,7 @@ class TrajectronEWTA(Trajectron):
 
     def train_loss(self, batch, node_type, loss_type,
                    lambda_kalman=1.0, lambda_sim=1.0, temp=0.1,
-                   contrastive=False):
+                   contrastive=False, plm=False):
         (first_history_index,
          x_t, y_t, x_st_t, y_st_t,
          neighbors_data_st,
@@ -61,6 +61,7 @@ class TrajectronEWTA(Trajectron):
                                 loss_type=loss_type,
                                 score=score,
                                 contrastive=contrastive,
+                                plm=plm,
                                 factor_con=lambda_kalman,
                                 temp=temp)
         return loss
