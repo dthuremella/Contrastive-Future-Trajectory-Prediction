@@ -19,6 +19,7 @@ from Trajectron_plus_plus.trajectron.model.model_utils import cyclical_lr
 from Trajectron_plus_plus.trajectron.model.dataset import EnvironmentDataset, collate
 from Trajectron_plus_plus.trajectron.visualization import visualization
 from Trajectron_plus_plus.trajectron.evaluation import evaluation
+from bmc_loss import BMCLoss
 from tensorboardX import SummaryWriter
 # torch.autograd.set_detect_anomaly(True)
 
@@ -238,6 +239,13 @@ def main():
             continue
         optimizer[node_type] = optim.Adam([{'params': model_registrar.get_all_but_name_match('map_encoder').parameters()},
                                            {'params': model_registrar.get_name_match('map_encoder').parameters(), 'lr':0.0008}], lr=hyperparams['learning_rate'])
+        criterion = None
+        if args.bmc:
+            sigma_lr = 1e-2
+            init_noise_sigma = 1
+            criterion = BMCLoss(init_noise_sigma)
+            optimizer[node_type].add_param_group({'params': criterion.noise_sigma, 'lr': sigma_lr, 'name': 'noise_sigma'})
+
         # Set Learning Rate
         if hyperparams['learning_rate_style'] == 'const':
             lr_scheduler[node_type] = optim.lr_scheduler.ExponentialLR(optimizer[node_type], gamma=1.0)
@@ -260,7 +268,8 @@ def main():
                 trajectron.set_curr_iter(curr_iter)
                 trajectron.step_annealers(node_type)
                 optimizer[node_type].zero_grad()
-                train_loss = trajectron.train_loss(batch, node_type, 'epe-top-20', contrastive=args.contrastive, plm=args.plm)
+                train_loss = trajectron.train_loss(batch, node_type, 'epe-top-20', contrastive=args.contrastive, 
+                                                   plm=args.plm, bmc=args.bmc, criterion=criterion)
                 pbar.set_description(f"Epoch {epoch}, {node_type} L: {train_loss.item():.2f}")
                 train_loss.backward()
                 # Clipping gradients.

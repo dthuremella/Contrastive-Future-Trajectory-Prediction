@@ -252,6 +252,8 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
                    score,
                    contrastive=False,
                    plm=False,
+                   bmc=False,
+                   criterion=None,
                    factor_con=100,
                    temp=0.1):
         mode = ModeKeys.TRAIN
@@ -274,7 +276,7 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
         loss = self.ewta_loss(y, labels, mode=mode, top_n=top_n)
         if contrastive:
             con_loss, positive, negative = contrastive_three_modes_loss(features, score, temp=temp)
-            final_loss = loss + factor_con * con_loss
+            loss = loss + factor_con * con_loss
             if self.log_writer is not None:
                 self.log_writer.add_scalar('%s/%s' % (str(self.node_type), 'contrastive_loss'),
                                            con_loss, self.curr_iter)
@@ -285,15 +287,16 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
         elif plm:
             lamda = 1
             plm_loss = 1 - pareto(loss)
-            final_loss = loss + lamda * plm_loss
-        else:
-            final_loss = loss
-        
-        final_loss = torch.mean(final_loss)
+            loss = loss + lamda * plm_loss
+
+        elif bmc:
+            loss = criterion(y, labels)
+
+        final_loss = torch.mean(loss)
 
         if self.log_writer is not None:
             self.log_writer.add_scalar('%s/%s' % (str(self.node_type), 'loss'),
-                                       loss, self.curr_iter)
+                                       final_loss, self.curr_iter)
         return final_loss
 
     def predict(self,
