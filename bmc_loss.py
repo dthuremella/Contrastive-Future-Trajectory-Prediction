@@ -22,16 +22,15 @@ def bmc_loss_md(y, labels, noise_var):
             else torch.device('cpu'))
     I = torch.eye(pred.shape[-1]).to(device)
     logits = MVN(pred.unsqueeze(1), noise_var*I).log_prob(target.unsqueeze(0)).to(device)  # logit size: [batch, batch]
-    pred_reshaped = torch.arange(pred.shape[0]).to(device)
-    loss = F.cross_entropy(logits, pred_reshaped)     # contrastive-like loss
+    loss = F.cross_entropy(logits, torch.arange(pred.shape[0]).to(device))     # contrastive-like loss
     loss = loss * (2 * noise_var).detach()  # optional: restore the loss scale, 'detach' when noise is learnable 
     
     return loss
 
 class BMCLoss(_Loss):
-    def __init__(self, init_noise_sigma):
+    def __init__(self, init_noise_sigma, device):
         super(BMCLoss, self).__init__()
-        self.noise_sigma = torch.nn.Parameter(torch.tensor(init_noise_sigma, dtype=torch.float))
+        self.noise_sigma = torch.nn.Parameter(torch.tensor(init_noise_sigma, device=device, dtype=torch.float))
 
     def forward(self, pred, target):
         noise_var = self.noise_sigma ** 2
