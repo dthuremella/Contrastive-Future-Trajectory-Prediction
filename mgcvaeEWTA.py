@@ -290,7 +290,8 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
             loss = loss + lamda * plm_loss
 
         elif bmc:
-            loss = criterion(y, labels)
+            lamda = 1
+            loss = loss + lamda * criterion(y, labels)
 
         final_loss = torch.mean(loss)
 
