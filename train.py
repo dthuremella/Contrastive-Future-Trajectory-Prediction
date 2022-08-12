@@ -309,7 +309,7 @@ def main():
                                                  timestep,
                                                  ph,
                                                  min_future_timesteps=ph,
-                                                 z_mode=True,
+                                                 z_mode=False,
                                                  gmm_mode=True,
                                                  all_z_sep=False,
                                                  full_dist=False)
@@ -356,7 +356,7 @@ def main():
                                                       timestep,
                                                       ph,
                                                       min_future_timesteps=ph,
-                                                      z_mode=True,
+                                                      z_mode=False,
                                                       gmm_mode=True,
                                                       all_z_sep=True,
                                                       full_dist=False)

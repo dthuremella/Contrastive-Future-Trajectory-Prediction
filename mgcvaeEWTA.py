@@ -12,8 +12,8 @@ from Trajectron_plus_plus.trajectron.model.mgcvae import MultimodalGenerativeCVA
 import utilities
 
 def pareto(a):
-    nu = 1
-    epsilon = 0.1
+    nu = 100
+    epsilon = 0.01
     p = (1 + epsilon * a / nu) ** -(1/epsilon + 1)
     return p
 

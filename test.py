@@ -41,7 +41,7 @@ def set_seed(seed):
 
 def load_model(model_dir, env, ts=100):
     model_registrar = ModelRegistrar(model_dir, 'cpu')
-    if 'ewta' in model_dir and 'nuScenes' not in model_dir:
+    if True: #'ewta' in model_dir and 'nuScenes' not in model_dir:
         model_registrar.load_models(ts)
     else:
         model_registrar.model_dict.clear()
@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 continue
             batch_error_dict = evaluation.compute_batch_statistics(
                 predictions, scene.dt, max_hl=max_hl, ph=ph,
-                node_type_enum=env.NodeType, map=None,
+                node_type_enum=env.NodeType, map=scene.map,
                 best_of=True,
                 prune_ph_to_future=True)
             eval_ade_batch_errors = np.hstack((eval_ade_batch_errors, batch_error_dict[args.node_type]['ade']))
