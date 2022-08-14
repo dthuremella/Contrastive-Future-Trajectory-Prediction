@@ -96,7 +96,7 @@ if __name__ == "__main__":
                 min_future_timesteps=prediction_parameters[1],
                 selected_node_type=args.node_type)
 
-            visualization.visualize_prediction(predictions1, predictions2, scene.dt, max_hl=max_hl, ph=ph, map=None)
+            visualization.visualize_prediction(predictions1, predictions2, scene.dt, max_hl=max_hl, ph=ph, map=scene.map)
 
             import pdb; pdb.set_trace()
 
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                 continue
             batch_error_dict = evaluation.compute_batch_statistics(
                 predictions, scene.dt, max_hl=max_hl, ph=ph,
-                node_type_enum=env.NodeType, map=None,
+                node_type_enum=env.NodeType, map=scene.map,
                 best_of=True,
                 prune_ph_to_future=True)
             eval_ade_batch_errors = np.hstack((eval_ade_batch_errors, batch_error_dict[args.node_type]['ade']))
