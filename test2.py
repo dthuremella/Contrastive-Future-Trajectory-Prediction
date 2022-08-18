@@ -34,6 +34,7 @@ def parse_arguments():
     parser.add_argument("--data", help="full path to data file", type=str)
     parser.add_argument("--node_type", type=str)
     parser.add_argument("--kalman", type=str)
+    parser.add_argument('--map_density', action='store_true')
     return parser.parse_args()
 
 
@@ -96,7 +97,10 @@ if __name__ == "__main__":
                 min_future_timesteps=prediction_parameters[1],
                 selected_node_type=args.node_type)
 
-            visualization.visualize_prediction(predictions1, predictions2, scene.dt, max_hl=max_hl, ph=ph, map=scene.map)
+            import pdb; pdb.set_trace()
+            visualization.visualize_prediction(predictions1, predictions2, scene.dt, max_hl=max_hl, ph=ph, 
+                                                map=scene.map['VISUALIZATION'] if scene.map is not None else None,
+                                                map_density=args.map_density)
 
             import pdb; pdb.set_trace()
 
