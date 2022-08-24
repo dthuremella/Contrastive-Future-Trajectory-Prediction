@@ -285,13 +285,14 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
                 self.log_writer.add_scalar('%s/%s' % (str(self.node_type), 'negatives'),
                                            negative, self.curr_iter)
         elif plm:
-            lamda = 1
+            lamda = 0.99
             plm_loss = 1 - pareto(loss)
-            loss = loss + lamda * plm_loss
+            loss = (1-lamda) * loss + lamda * plm_loss
 
         elif bmc:
             lamda = 1
-            loss = loss + lamda * criterion(y, labels)
+            loss = (1 - lamda) * loss + lamda * criterion(y, labels)
+            # loss = criterion(y, labels)
 
         final_loss = torch.mean(loss)
 
