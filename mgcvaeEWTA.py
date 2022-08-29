@@ -275,6 +275,7 @@ class MultimodalGenerativeCVAEEWTA(MultimodalGenerativeCVAE):
             top_n = int(loss_type.replace('epe-top-', ''))
         loss = self.ewta_loss(y, labels, mode=mode, top_n=top_n)
         if contrastive:
+            import pdb; pdb.set_trace()
             con_loss, positive, negative = contrastive_three_modes_loss(features, score, temp=temp)
             loss = loss + factor_con * con_loss
             if self.log_writer is not None:

@@ -8,6 +8,7 @@ import numpy as np
 from Trajectron_plus_plus.trajectron.model.trajectron import Trajectron
 from Trajectron_plus_plus.trajectron.model.dataset import get_timesteps_data, restore
 from mgcvaeEWTA import MultimodalGenerativeCVAEEWTA
+from utilities import estimate_kalman_filter
 
 
 class TrajectronEWTA(Trajectron):
@@ -36,6 +37,7 @@ class TrajectronEWTA(Trajectron):
          neighbors_edge_value,
          robot_traj_st_t,
          map, score) = batch
+        import pdb; pdb.set_trace()
         neighbors_data_st_0_dict = restore(neighbors_data_st)
         neighbors_edge_value_0_dict = restore(neighbors_edge_value)
         x = x_t.to(self.device)
@@ -48,6 +50,19 @@ class TrajectronEWTA(Trajectron):
         if type(map) == torch.Tensor:
             map = map.to(self.device)
         model = self.node_models_dict[node_type]
+        if contrastive:
+            scores = torch.zeros(first_history_index.shape)
+            for i in range(first_history_index.shape[0]):
+                x = x_t[i]
+                for j in range(y_t.shape[1]):
+                    gt = y_t[i,j]
+                    diff = gt - estimate_kalman_filter(x,j+1)
+                    scores[i] = scores[i] + np.linalg.norm(diff)
+                scores[i] = scores[i] / y_t.shape[1]
+                 
+
+
+
         loss = model.train_loss(inputs=x,
                                 inputs_st=x_st_t,
                                 first_history_indices=first_history_index,
@@ -59,7 +74,7 @@ class TrajectronEWTA(Trajectron):
                                 map=map,
                                 prediction_horizon=self.ph,
                                 loss_type=loss_type,
-                                score=score,
+                                score=scores,
                                 contrastive=contrastive,
                                 plm=plm,
                                 bmc=bmc,

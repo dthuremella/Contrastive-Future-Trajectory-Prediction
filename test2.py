@@ -47,7 +47,7 @@ def set_seed(seed):
 
 def load_model(model_dir, env, ts=100):
     model_registrar = ModelRegistrar(model_dir, 'cpu')
-    if 'ewta' in model_dir and 'nuScenes' not in model_dir:
+    if True: #'ewta' in model_dir and 'nuScenes' not in model_dir:
         model_registrar.load_models(ts)
     else:
         model_registrar.model_dict.clear()
