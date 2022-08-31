@@ -4,6 +4,7 @@
     https://github.com/StanfordASL/Trajectron-plus-plus
 """
 import torch
+import numpy as np
 from Trajectron_plus_plus.trajectron.model.dynamics.single_integrator import SingleIntegrator as SingleIntegratorCVAE
 from Trajectron_plus_plus.trajectron.model.dynamics.unicycle import Unicycle as UnicycleCVAE
 
@@ -44,17 +45,24 @@ def estimate_kalman_filter(history, prediction_horizon):
     z_y = history[:, 1]
     v_x = 0
     v_y = 0
+    num_nans = 0
     for index in range(length_history - 1):
+        if torch.isnan(z_x[index]) or torch.isnan(z_y[index]):
+            num_nans = num_nans + 1
+            continue
         v_x += z_x[index + 1] - z_x[index]
         v_y += z_y[index + 1] - z_y[index]
+    z_x = z_x[num_nans:]
+    z_y = z_y[num_nans:]
+    length_history = length_history - num_nans
     v_x = v_x / (length_history - 1)
     v_y = v_y / (length_history - 1)
-    x_x = np.zeros(length_history + 1, np.float32)
-    x_y = np.zeros(length_history + 1, np.float32)
-    P_x = np.zeros(length_history + 1, np.float32)
-    P_y = np.zeros(length_history + 1, np.float32)
-    P_vx = np.zeros(length_history + 1, np.float32)
-    P_vy = np.zeros(length_history + 1, np.float32)
+    x_x = torch.zeros(length_history + 1)
+    x_y = torch.zeros(length_history + 1)
+    P_x = torch.zeros(length_history + 1)
+    P_y = torch.zeros(length_history + 1)
+    P_vx = torch.zeros(length_history + 1)
+    P_vy = torch.zeros(length_history + 1)
 
     # we initialize the uncertainty to one (unit gaussian)
     P_x[0] = 1.0
@@ -66,10 +74,10 @@ def estimate_kalman_filter(history, prediction_horizon):
 
     Q = 0.00001
     R = 0.0001
-    K_x = np.zeros(length_history + 1, np.float32)
-    K_y = np.zeros(length_history + 1, np.float32)
-    K_vx = np.zeros(length_history + 1, np.float32)
-    K_vy = np.zeros(length_history + 1, np.float32)
+    K_x = torch.zeros(length_history + 1)
+    K_y = torch.zeros(length_history + 1)
+    K_vx = torch.zeros(length_history + 1)
+    K_vy = torch.zeros(length_history + 1)
     for k in range(length_history - 1):
         x_x[k + 1] = x_x[k] + v_x
         x_y[k + 1] = x_y[k] + v_y

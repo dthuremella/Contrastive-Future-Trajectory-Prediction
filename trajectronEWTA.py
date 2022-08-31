@@ -37,7 +37,7 @@ class TrajectronEWTA(Trajectron):
          neighbors_edge_value,
          robot_traj_st_t,
          map, score) = batch
-        import pdb; pdb.set_trace()
+
         neighbors_data_st_0_dict = restore(neighbors_data_st)
         neighbors_edge_value_0_dict = restore(neighbors_edge_value)
         x = x_t.to(self.device)
@@ -53,14 +53,12 @@ class TrajectronEWTA(Trajectron):
         if contrastive:
             scores = torch.zeros(first_history_index.shape)
             for i in range(first_history_index.shape[0]):
-                x = x_t[i]
                 for j in range(y_t.shape[1]):
                     gt = y_t[i,j]
-                    diff = gt - estimate_kalman_filter(x,j+1)
+                    diff = gt - torch.tensor(estimate_kalman_filter(x[i],j+1))
                     scores[i] = scores[i] + np.linalg.norm(diff)
+                # average scores (diffs) for 12 timesteps of future (ADE)
                 scores[i] = scores[i] / y_t.shape[1]
-                 
-
 
 
         loss = model.train_loss(inputs=x,
